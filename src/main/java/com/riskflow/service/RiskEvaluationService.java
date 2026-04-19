@@ -1,6 +1,6 @@
 package com.riskflow.service;
 
-import com.riskflow.model.PaymentStatus;
+import com.riskflow.model.TransactionStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -10,7 +10,7 @@ public class RiskEvaluationService {
 
     private static final BigDecimal HIGH_AMOUNT = new BigDecimal("10000.00");
 
-    public record RiskOutcome(int score, String reason, PaymentStatus status) {
+    public record RiskOutcome(int score, String triggeredRule, String reason, TransactionStatus status) {
     }
 
     /**
@@ -18,6 +18,7 @@ public class RiskEvaluationService {
      */
     public RiskOutcome evaluate(BigDecimal amount, String currency) {
         int score = 10;
+        String triggeredRule;
         String reason;
 
         boolean highAmount = amount.compareTo(HIGH_AMOUNT) > 0;
@@ -25,26 +26,30 @@ public class RiskEvaluationService {
 
         if (highAmount && nonUsd) {
             score += 55;
-            reason = "amount_above_threshold,non_usd_currency";
+            triggeredRule = "HIGH_AMOUNT_AND_NON_USD";
+            reason = "Amount above threshold and non-USD currency.";
         } else if (highAmount) {
             score += 40;
-            reason = "amount_above_threshold";
+            triggeredRule = "HIGH_AMOUNT";
+            reason = "Amount above threshold.";
         } else if (nonUsd) {
             score += 15;
-            reason = "non_usd_currency";
+            triggeredRule = "NON_USD";
+            reason = "Non-USD currency.";
         } else {
-            reason = "baseline";
+            triggeredRule = "BASELINE";
+            reason = "No elevated rules triggered.";
         }
 
-        PaymentStatus status;
+        TransactionStatus status;
         if (score >= 60) {
-            status = PaymentStatus.DECLINED;
+            status = TransactionStatus.DECLINED;
         } else if (score >= 40) {
-            status = PaymentStatus.MANUAL_REVIEW;
+            status = TransactionStatus.MANUAL_REVIEW;
         } else {
-            status = PaymentStatus.APPROVED;
+            status = TransactionStatus.APPROVED;
         }
 
-        return new RiskOutcome(Math.min(score, 100), reason, status);
+        return new RiskOutcome(Math.min(score, 100), triggeredRule, reason, status);
     }
 }

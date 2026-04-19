@@ -1,6 +1,7 @@
 package com.riskflow.model;
 
-public enum PaymentStatus {
+public enum TransactionStatus {
+    PENDING,
     APPROVED,
     DECLINED,
     MANUAL_REVIEW
