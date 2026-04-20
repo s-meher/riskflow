@@ -7,6 +7,7 @@ import com.riskflow.dto.PaymentEventIngestRequest;
 import com.riskflow.model.DecisionType;
 import com.riskflow.model.PaymentEvent;
 import com.riskflow.model.PaymentEventStatus;
+import com.riskflow.model.PaymentEventType;
 import com.riskflow.model.RiskDecision;
 import com.riskflow.model.Transaction;
 import com.riskflow.model.TransactionStatus;
@@ -60,6 +61,14 @@ public class EventIngestionService {
     public EventIngestResponse ingest(PaymentEventIngestRequest request) {
         String rawPayload = serializeRequest(request);
 
+        // Basic idempotency: if an identical event (transactionId + eventType + eventTimestamp) was already ingested,
+        // return a stable response and avoid re-writing events/decisions.
+        var existingEvent = paymentEventRepository.findByTransaction_TransactionIdAndEventTypeAndEventTimestamp(
+                request.transactionId(),
+                request.eventType(),
+                request.eventTimestamp()
+        );
+
         Instant since = Instant.now().minus(RECENT_FAILURE_WINDOW);
         long priorFailedCount = paymentEventRepository.countFailedEventsForUserSince(
                 request.userId(),
@@ -71,28 +80,33 @@ public class EventIngestionService {
 
         Transaction transaction = upsertTransaction(request);
 
-        PaymentEvent savedEvent = paymentEventRepository.save(new PaymentEvent(
+        PaymentEvent savedEvent = existingEvent.orElseGet(() -> paymentEventRepository.save(new PaymentEvent(
                 transaction,
                 request.eventType(),
                 request.status(),
                 request.reason(),
                 request.eventTimestamp(),
                 rawPayload
-        ));
+        )));
 
         List<String> triggeredRules = evaluateRules(request, effectiveFailureCount);
 
         DecisionType decision = decide(triggeredRules);
         TransactionStatus txStatus = toTransactionStatus(decision);
 
-        transaction.setStatus(txStatus);
-        transactionRepository.save(transaction);
+        // Keep transaction status stable across retries.
+        if (transaction.getStatus() != txStatus) {
+            transaction.setStatus(txStatus);
+            transactionRepository.save(transaction);
+        }
 
         String triggeredRuleField = triggeredRules.isEmpty() ? "NONE" : String.join(",", triggeredRules);
         String reason = buildDecisionReason(triggeredRules, request);
 
-        RiskDecision riskDecision = new RiskDecision(transaction, decision, triggeredRuleField, reason);
-        riskDecisionRepository.save(riskDecision);
+        if (existingEvent.isEmpty()) {
+            RiskDecision riskDecision = new RiskDecision(transaction, decision, triggeredRuleField, reason);
+            riskDecisionRepository.save(riskDecision);
+        }
 
         return new EventIngestResponse(
                 transaction.getId(),
@@ -114,13 +128,13 @@ public class EventIngestionService {
     }
 
     private Transaction upsertTransaction(PaymentEventIngestRequest request) {
+        String currency = request.currency().toUpperCase();
         return transactionRepository.findByTransactionId(request.transactionId())
                 .map(existing -> {
                     existing.setUserId(request.userId());
                     existing.setAmount(request.amount());
-                    existing.setCurrency(request.currency().toUpperCase());
+                    existing.setCurrency(currency);
                     existing.setPaymentMethod(request.paymentMethod());
-                    existing.setStatus(TransactionStatus.PENDING);
                     return transactionRepository.save(existing);
                 })
                 .orElseGet(() -> transactionRepository.save(new Transaction(
@@ -128,7 +142,7 @@ public class EventIngestionService {
                         request.transactionId(),
                         request.userId(),
                         request.amount(),
-                        request.currency().toUpperCase(),
+                        currency,
                         request.paymentMethod(),
                         TransactionStatus.PENDING
                 )));
@@ -138,6 +152,7 @@ public class EventIngestionService {
      * Rules are independent checks; results are combined in {@link #decide(List)}.
      */
     private List<String> evaluateRules(PaymentEventIngestRequest request, long effectiveFailureCount) {
+        PaymentEventType eventType = request.eventType();
         List<String> rules = new ArrayList<>();
         if (request.amount().compareTo(HIGH_AMOUNT_THRESHOLD) > 0) {
             rules.add(RULE_HIGH_AMOUNT);
@@ -145,7 +160,8 @@ public class EventIngestionService {
         if (!SUPPORTED_CURRENCIES.contains(request.currency().toUpperCase())) {
             rules.add(RULE_UNSUPPORTED_CURRENCY);
         }
-        if (effectiveFailureCount >= 3) {
+        // Only flag repeated failures when ingesting an actual payment result, not system events.
+        if (eventType == PaymentEventType.PAYMENT_SUBMITTED && effectiveFailureCount >= 3) {
             rules.add(RULE_REPEATED_FAILURES);
         }
         return rules;

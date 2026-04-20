@@ -20,7 +20,7 @@ public class TransactionQueryService {
 
     @Transactional(readOnly = true)
     public List<TransactionResponse> listAll() {
-        return transactionRepository.findAllByOrderByCreatedAtDesc().stream()
+        return transactionRepository.findAllByOrderByUpdatedAtDesc().stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -30,7 +30,7 @@ public class TransactionQueryService {
      */
     @Transactional(readOnly = true)
     public List<TransactionResponse> listFlagged() {
-        return transactionRepository.findByStatusOrderByCreatedAtDesc(TransactionStatus.MANUAL_REVIEW).stream()
+        return transactionRepository.findByStatusOrderByUpdatedAtDesc(TransactionStatus.MANUAL_REVIEW).stream()
                 .map(this::toResponse)
                 .toList();
     }

@@ -42,7 +42,7 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<PaymentResponse> listPayments() {
-        return transactionRepository.findAll().stream().map(this::toResponse).toList();
+        return transactionRepository.findAllByOrderByUpdatedAtDesc().stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)

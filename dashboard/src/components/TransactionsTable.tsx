@@ -23,7 +23,7 @@ export function TransactionsTable({ rows }: { rows: TransactionRow[] | null }) {
         <div className="section-head">
           <h2>Transactions</h2>
         </div>
-        <p className="muted">Loading…</p>
+        <div className="empty muted">Loading…</div>
       </div>
     )
   }
@@ -40,7 +40,7 @@ export function TransactionsTable({ rows }: { rows: TransactionRow[] | null }) {
             <tr>
               <th>Transaction ID</th>
               <th>User</th>
-              <th>Amount</th>
+              <th className="td-right">Amount</th>
               <th>Method</th>
               <th>Status</th>
               <th>Updated</th>
@@ -49,7 +49,7 @@ export function TransactionsTable({ rows }: { rows: TransactionRow[] | null }) {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="muted">
+                <td colSpan={6} className="muted empty">
                   No transactions yet.
                 </td>
               </tr>
@@ -58,12 +58,12 @@ export function TransactionsTable({ rows }: { rows: TransactionRow[] | null }) {
                 <tr key={r.id}>
                   <td className="mono">{r.transactionId}</td>
                   <td>{r.userId}</td>
-                  <td>{fmtMoney(r.amount, r.currency)}</td>
+                  <td className="td-right td-nowrap">{fmtMoney(r.amount, r.currency)}</td>
                   <td>{r.paymentMethod}</td>
                   <td>
                     <span className={`pill pill--${r.status.toLowerCase()}`}>{r.status}</span>
                   </td>
-                  <td className="muted small">{fmtTime(r.updatedAt)}</td>
+                  <td className="muted small td-nowrap">{fmtTime(r.updatedAt)}</td>
                 </tr>
               ))
             )}

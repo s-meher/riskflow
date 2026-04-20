@@ -2,6 +2,7 @@ package com.riskflow.repository;
 
 import com.riskflow.model.PaymentEvent;
 import com.riskflow.model.PaymentEventStatus;
+import com.riskflow.model.PaymentEventType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,4 +39,10 @@ public interface PaymentEventRepository extends JpaRepository<PaymentEvent, UUID
     List<PaymentEvent> findAllByOrderByEventTimestampDesc();
 
     long countByStatus(PaymentEventStatus status);
+
+    Optional<PaymentEvent> findByTransaction_TransactionIdAndEventTypeAndEventTimestamp(
+            String transactionId,
+            PaymentEventType eventType,
+            Instant eventTimestamp
+    );
 }

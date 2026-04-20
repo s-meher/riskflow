@@ -1,4 +1,4 @@
-import type { EventIngestPayload, EventIngestResult, MetricsSummary, TransactionRow } from './types'
+import type { EventIngestPayload, EventIngestResult, MetricsSummary, PaymentEventRow, TransactionRow } from './types'
 
 const prefix = import.meta.env.VITE_API_BASE ?? ''
 
@@ -40,6 +40,10 @@ export function fetchTransactions(): Promise<TransactionRow[]> {
 
 export function fetchFlagged(): Promise<TransactionRow[]> {
   return request<TransactionRow[]>('/api/transactions/flagged')
+}
+
+export function fetchEvents(): Promise<PaymentEventRow[]> {
+  return request<PaymentEventRow[]>('/api/events')
 }
 
 export function submitEvent(payload: EventIngestPayload): Promise<EventIngestResult> {

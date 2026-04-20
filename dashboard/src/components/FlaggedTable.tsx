@@ -23,7 +23,7 @@ export function FlaggedTable({ rows }: { rows: TransactionRow[] | null }) {
         <div className="section-head">
           <h2>Flagged queue</h2>
         </div>
-        <p className="muted">Loading…</p>
+        <div className="empty muted">Loading…</div>
       </div>
     )
   }
@@ -40,7 +40,7 @@ export function FlaggedTable({ rows }: { rows: TransactionRow[] | null }) {
             <tr>
               <th>Transaction ID</th>
               <th>User</th>
-              <th>Amount</th>
+              <th className="td-right">Amount</th>
               <th>Status</th>
               <th>Updated</th>
             </tr>
@@ -48,7 +48,7 @@ export function FlaggedTable({ rows }: { rows: TransactionRow[] | null }) {
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="muted">
+                <td colSpan={5} className="muted empty">
                   No flagged transactions.
                 </td>
               </tr>
@@ -57,11 +57,11 @@ export function FlaggedTable({ rows }: { rows: TransactionRow[] | null }) {
                 <tr key={r.id}>
                   <td className="mono">{r.transactionId}</td>
                   <td>{r.userId}</td>
-                  <td>{fmtMoney(r.amount, r.currency)}</td>
+                  <td className="td-right td-nowrap">{fmtMoney(r.amount, r.currency)}</td>
                   <td>
                     <span className="pill pill--manual_review">{r.status}</span>
                   </td>
-                  <td className="muted small">{fmtTime(r.updatedAt)}</td>
+                  <td className="muted small td-nowrap">{fmtTime(r.updatedAt)}</td>
                 </tr>
               ))
             )}

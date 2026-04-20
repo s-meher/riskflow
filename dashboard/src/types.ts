@@ -40,3 +40,18 @@ export interface EventIngestResult {
   reason: string
   transactionStatus: string
 }
+
+export interface PaymentEventRow {
+  id: string
+  transactionId: string
+  userId: string
+  amount: number
+  currency: string
+  paymentMethod: string
+  eventType: string
+  status: string
+  reason: string | null
+  eventTimestamp: string
+  createdAt: string
+  updatedAt: string
+}

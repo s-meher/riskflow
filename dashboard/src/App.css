@@ -1,12 +1,12 @@
 .dash {
-  max-width: 1120px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 2.5rem;
+  padding: 1.25rem 1.25rem 2.5rem;
 }
 
 .topbar {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.5rem;
@@ -16,8 +16,8 @@
 
 .topbar h1 {
   margin: 0;
-  font-size: 1.35rem;
-  font-weight: 650;
+  font-size: 1.25rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
 }
 
@@ -27,12 +27,49 @@
   font-size: 0.88rem;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid #d8dce3;
+  background: #fff;
+  color: #3d4450;
+  font-size: 0.78rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9aa3af;
+}
+
+.dot.ok {
+  background: #1a5f3c;
+}
+
+.block-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.65rem;
+}
+
 .block {
   margin-bottom: 1.5rem;
 }
 
 .block-title {
-  margin: 0 0 0.65rem;
+  margin: 0;
   font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -42,12 +79,28 @@
 
 .metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
+@media (max-width: 980px) {
+  .metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .metric-card {
-  padding: 1rem 1rem 0.9rem;
+  padding: 0.95rem 1rem 0.85rem;
+  min-height: 86px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .metric-label {
@@ -60,8 +113,8 @@
 }
 
 .metric-value {
-  font-size: 1.65rem;
-  font-weight: 700;
+  font-size: 1.55rem;
+  font-weight: 750;
   font-variant-numeric: tabular-nums;
   color: #11151d;
 }
@@ -124,6 +177,29 @@
   margin-top: 1rem;
 }
 
+.fieldset-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+fieldset {
+  border: 1px solid #e1e6ee;
+  border-radius: 10px;
+  padding: 0.9rem;
+  background: #fbfcfe;
+}
+
+legend {
+  padding: 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5c6470;
+}
+
 @media (max-width: 720px) {
   .form-grid {
     grid-template-columns: 1fr;
@@ -131,6 +207,10 @@
 
   .form-grid .span-2 {
     grid-column: auto;
+  }
+
+  .fieldset-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -182,6 +262,11 @@ select:focus {
   cursor: pointer;
 }
 
+.btn--sm {
+  padding: 0.35rem 0.55rem;
+  font-size: 0.82rem;
+}
+
 .btn:hover {
   background: #f4f5f7;
 }
@@ -192,14 +277,14 @@ select:focus {
 }
 
 .btn--primary {
-  background: #1b3a2f;
-  border-color: #1b3a2f;
+  background: #1f4d3a;
+  border-color: #1f4d3a;
   color: #f4faf7;
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: #234d3f;
-  border-color: #234d3f;
+  background: #245a43;
+  border-color: #245a43;
 }
 
 .banner {
@@ -223,6 +308,14 @@ select:focus {
   background: #fdecec;
   border: 1px solid #f0b4b4;
   color: #7a1f1f;
+}
+
+.form-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.8rem;
 }
 
 .grid-2 {
@@ -263,7 +356,7 @@ table {
 
 th,
 td {
-  padding: 0.55rem 1rem;
+  padding: 0.6rem 1rem;
   text-align: left;
   border-top: 1px solid #e8eaef;
 }
@@ -275,6 +368,9 @@ th {
   color: #5c6470;
   background: #f7f8fa;
   border-top: none;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 tbody tr:nth-child(even) {
@@ -287,7 +383,7 @@ tbody tr:nth-child(even) {
 
 .pill {
   display: inline-block;
-  padding: 0.15rem 0.45rem;
+  padding: 0.18rem 0.5rem;
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 600;
@@ -299,21 +395,81 @@ tbody tr:nth-child(even) {
 .pill--approved {
   background: #e3f4ea;
   color: #1a5f3c;
+  border: 1px solid #b8dfc8;
 }
 
 .pill--declined {
   background: #fde8e8;
   color: #8b1e1e;
+  border: 1px solid #f0b4b4;
 }
 
 .pill--pending {
   background: #fff4e0;
   color: #8a5a00;
+  border: 1px solid #ffd7a3;
 }
 
 .pill--manual_review {
   background: #e8eefc;
   color: #25408f;
+  border: 1px solid #c9d4e8;
+}
+
+.pill--failed {
+  background: #fde8e8;
+  color: #8b1e1e;
+  border: 1px solid #f0b4b4;
+}
+
+.td-right {
+  text-align: right;
+}
+
+.td-nowrap {
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 0.9rem 1rem;
+}
+
+.controls {
+  padding: 0.85rem 1rem 0.75rem;
+}
+
+.controls-row {
+  display: flex;
+  gap: 0.9rem;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 220px;
+  flex: 1 1 260px;
+}
+
+.control-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5c6470;
+}
+
+.controls-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.controls-foot {
+  margin-top: 0.65rem;
 }
 
 .footer {
