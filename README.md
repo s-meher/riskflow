@@ -1,24 +1,18 @@
 # RiskFlow
 
-**RiskFlow** is a small, event-driven **payment / risk pipeline** MVP: clients submit **payment events**, the service **validates** payloads, **persists** raw events and aggregates in **PostgreSQL**, applies **rule-based risk decisions**, and exposes **read APIs** plus a **lightweight ops dashboard** for demos and interviews.
-
-No Kafka, no auth, no microservices—just a single Spring Boot service and a focused React dashboard.
+**RiskFlow** is a Spring Boot backend for ingesting payment events, applying rule-based risk checks, storing transaction state and event history in PostgreSQL, and exposing operational APIs with a lightweight demo dashboard.
 
 ---
 
 ## Why this project matters
 
-Payment and risk systems are fundamentally about **immutable-ish event logs**, **deterministic rules**, and **operational visibility**. RiskFlow compresses that story into something you can:
-
-- run locally in minutes,
-- explain on a whiteboard,
-- extend with one more rule or one more read model without rewriting the world.
-
-It is positioned for **backend / data / risk-adjacent** conversations: ingestion, persistence, idempotency, metrics, and a thin UI for humans.
+Payment and risk systems are fundamentally about event ingestion, deterministic rules, state transitions, and operational visibility. RiskFlow compresses that into a portfolio-scale backend project that is easy to run locally, explain in interviews, and extend without rewriting the core model.
 
 ---
 
 ## Architecture
+
+This keeps the project easy to run locally while still reflecting a production-style backend structure.
 
 ```mermaid
 flowchart LR
@@ -53,7 +47,7 @@ flowchart LR
 | Entity | Role |
 |--------|------|
 | **Transaction** | Business aggregate for a payment: `transactionId`, `userId`, `amount`, `currency`, `paymentMethod`, lifecycle `status`, timestamps. |
-| **PaymentEvent** | Append-only style record of what happened: `eventType`, `status`, `reason`, `eventTimestamp`, **`rawPayload`** (serialized request), link to `Transaction`. |
+| **PaymentEvent** | Event record of what happened: `eventType`, `status`, `reason`, `eventTimestamp`, **`rawPayload`** (serialized request), link to `Transaction`. |
 | **RiskDecision** | Outcome of a risk evaluation for a transaction: `decision`, `triggeredRule(s)`, `reason`, timestamps. |
 
 **Enums (high level):** `TransactionStatus` (e.g. `PENDING`, `APPROVED`, `DECLINED`, `MANUAL_REVIEW`), `DecisionType` (`APPROVE`, `DECLINE`, `REVIEW`), `PaymentEventType`, `PaymentEventStatus`, `PaymentMethod`.
@@ -70,7 +64,6 @@ flowchart LR
 | `GET` | `/api/transactions` | List transactions (newest activity first). |
 | `GET` | `/api/transactions/flagged` | Transactions in manual review (`MANUAL_REVIEW`). |
 | `GET` | `/api/metrics/summary` | Counts: totals, approved, flagged, rejected, failed payment events. |
-| `POST` | `/api/payments` | Legacy demo ingest (separate flow); prefer `/api/events` for the core story. |
 
 **Errors:** validation and malformed JSON return a consistent JSON shape via `GlobalExceptionHandler` (`ApiError`: `message`, `details`, HTTP status).
 
@@ -90,19 +83,18 @@ Evaluated in `EventIngestionService` after the event is stored:
 
 **Idempotency (demo-safe):** duplicate submissions with the same **`transactionId` + `eventType` + `eventTimestamp`** return a stable response and do not create duplicate rows.
 
-### Legacy payment ingest (`POST /api/payments`)
-
-Uses `RiskEvaluationService` with a separate threshold story (primarily for the older demo path). Prefer documenting `/api/events` in interviews unless you explicitly keep both.
-
 ---
 
 ## Frontend dashboard
 
-Path: **`dashboard/`**
+A lightweight React + Vite dashboard is included for demos. It supports:
+- metrics summary
+- payment event submission
+- recent events
+- transaction search/filtering
+- flagged transaction queue
 
-Internal-style UI: metrics, submit-event form (with sample payload shortcuts), latest events, searchable/filterable transactions, flagged queue, refresh controls.
-
-Dev proxy: `vite.config.ts` maps `/api` → `http://localhost:8080`. CORS is enabled for common Vite ports in `WebConfig` if you call the API directly.
+The UI is intentionally thin so the backend remains the focus.
 
 ### Metrics snapshot
 
@@ -227,6 +219,11 @@ Screenshot source files live in **`docs/screenshots/`** (see `docs/screenshots/R
 
 ---
 
-## License
+## Author
 
-No license file is bundled by default—add one (e.g. MIT) if you want explicit open-source terms.
+**Shree Meher**
+
+- [GitHub](https://github.com/s-meher)
+- [LinkedIn](https://www.linkedin.com/in/shree-meher/)
+- [Portfolio](https://shree-portfolio-virid.vercel.app/)
+
